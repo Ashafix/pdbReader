@@ -1,41 +1,45 @@
-def init():
-	global connectivity
-	connectivity = {}
-	#deoxyribose
-	deoxy = {"C1'": ["C2'", "O4'"],
-		"C2'": ["C1'", "C3'", "O2'"],
-		"C3'": ["C2'", "C4'", "O3'"],
-		"C4'": ["O4'", "C3'", "C5'"],
-		"C5'": ["C4'", "O5'"],
-		"O3'": ["C3'"],
-		"O4'": ["C4'", "C1'"],
-		"O5'": ["C5'", "P"],
-		"P": ["O5'", 'OP1', 'OP2']}
+from math import sqrt
 
-	#cytosine
-	connectivity['DC'] = {'N1': ['C2', 'C6'], 
-		'C6': ['N1', 'C5'],
-		'C5': ['C4', 'C6'],
-		'C4': ['C5', 'N3', 'N4'],
-		'N4': ['C4'],
-		'N3': ['C4','C2'],
-		'C2': ['O2', 'N1', 'N3'],
-		'O2': ['C2']}
-	#connectivity['DC'] = {**connectivity['DC'], **deoxy}
-	connectivity['DC'].update(deoxy)
-	connectivity['DC'].update({'N1': "C1'"})
-	#adenine
-	connectivity['DA'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'N6', 'C5'], 'N6': ['C6'], 'C5': ['C4', 'C6', 'N7'], 'C4': ['N3', 'N9', 'C5'], 'N7': ['C5', 'C8'], 'C8': ['N7', 'N9'], 'N9': ['C4', 'N7']}
-	connectivity['DA'].update(deoxy)
-	connectivity['DC'].update({'N9': "C1'"})
-	#guanine
-	connectivity['DG'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'O6', 'C5'], 'O6': ['C6'], 'C5': ['C4', 'C6', 'N7'], 'C4': ['N3', 'N9', 'C5'], 'N7': ['C5', 'C8'], 'C8': ['N7', 'N9'], 'N9': ['C4', 'N7']}
-	connectivity['DG'].update(deoxy)
-	connectivity['DC'].update({'N9': "C1'"})
-	#thymine
-	connectivity['DT'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'C5'], 'C5': ['C4', 'C6', 'C7'], 'C4': ['C5', 'O4', 'N3'], 'O4': ['C4'], 'N3': ['C4', 'C2'], 'C2': ['O2', 'N1', 'N3'], 'O2': ['C2']}
-	connectivity['DT'].update(deoxy)
-	connectivity['DC'].update({'N1': "C1'"})
+
+
+
+global connectivity
+connectivity = {}
+#deoxyribose
+deoxy = {"C1'": ["C2'", "O4'"],
+	"C2'": ["C1'", "C3'", "O2'"],
+	"C3'": ["C2'", "C4'", "O3'"],
+	"C4'": ["O4'", "C3'", "C5'"],
+	"C5'": ["C4'", "O5'"],
+	"O3'": ["C3'"],
+	"O4'": ["C4'", "C1'"],
+	"O5'": ["C5'", "P"],
+	"P": ["O5'", 'OP1', 'OP2']}
+
+#cytosine
+connectivity['DC'] = {'N1': ['C2', 'C6'], 
+	'C6': ['N1', 'C5'],
+	'C5': ['C4', 'C6'],
+	'C4': ['C5', 'N3', 'N4'],
+	'N4': ['C4'],
+	'N3': ['C4','C2'],
+	'C2': ['O2', 'N1', 'N3'],
+	'O2': ['C2']}
+#connectivity['DC'] = {**connectivity['DC'], **deoxy}
+connectivity['DC'].update(deoxy)
+connectivity['DC'].update({'N1': "C1'"})
+#adenine
+connectivity['DA'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'N6', 'C5'], 'N6': ['C6'], 'C5': ['C4', 'C6', 'N7'], 'C4': ['N3', 'N9', 'C5'], 'N7': ['C5', 'C8'], 'C8': ['N7', 'N9'], 'N9': ['C4', 'N7']}
+connectivity['DA'].update(deoxy)
+connectivity['DC'].update({'N9': "C1'"})
+#guanine
+connectivity['DG'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'O6', 'C5'], 'O6': ['C6'], 'C5': ['C4', 'C6', 'N7'], 'C4': ['N3', 'N9', 'C5'], 'N7': ['C5', 'C8'], 'C8': ['N7', 'N9'], 'N9': ['C4', 'N7']}
+connectivity['DG'].update(deoxy)
+connectivity['DC'].update({'N9': "C1'"})
+#thymine
+connectivity['DT'] = {'N1': ['C2', 'C6'], 'C6': ['N1', 'C5'], 'C5': ['C4', 'C6', 'C7'], 'C4': ['C5', 'O4', 'N3'], 'O4': ['C4'], 'N3': ['C4', 'C2'], 'C2': ['O2', 'N1', 'N3'], 'O2': ['C2']}
+connectivity['DT'].update(deoxy)
+connectivity['DC'].update({'N1': "C1'"})
 
 class atom:
 	def __init__(self, pos, x, y, z, chain='', element='', atom_name='', b=0, charge='', residue='', connections=[]):
@@ -53,9 +57,10 @@ class atom:
 			self.charge = 0
 		self.residue = int(residue)
 		self.connections = connections
-
+	def coords(self):
+		return(self.x, self.y, self.z)
 class residue:
-	def __init__(self, index=None, res_name='', chain='', atoms=[], connections={}):
+	def __init__(self, index=None, res_name='', chain='', atoms=[]):
 		if index:
 			self.index = int(index)
 		else:
@@ -63,19 +68,18 @@ class residue:
 		self.res_name = str(res_name).strip()
 		self.chain = str(chain)
 		self.atoms = atoms
-		self.connections = {}
+		
 	def add_atoms(self, atoms):
 		self.atoms = atoms
-	def add_connection(self, atom1, atom2):
-		if self.connections.get(atom1.position):
-			self.connections[atom1.position].append(atom2.position)
-		else:
-			self.connections[atom1.position] = [atom2.position]
-
+	def get_atoms(self):
+		for a in self.atoms:
+			yield(a)
+		
 class structure:
 	def __init__(self):
 		self.atoms = []
 		self.residues = []
+		self.connections = {}
 	def add_atom(self, atom):
 		self.atoms.append(atom)
 	def add_residue(self, residue_index, res_name='', chain=''):
@@ -90,19 +94,32 @@ class structure:
 		pass
 	def residues(self):
 		return self.residues
-	def atoms(self):
-		return self.atoms
-	def create_connections(self):
-	#create connections
+	def get_atoms(self):
+		for a in self.atoms:
+			yield(a)
+	def add_connection(self, atom1, atom2):
+		if self.connections.get(atom1.position):
+			self.connections[atom1.position].append(atom2.position)
+		else:
+			self.connections[atom1.position] = [atom2.position]
+
+	def create_connections_by_id(self):
+	#create connections by using only the atom IDs
 		for residue in self.residues:
 			if connectivity.get(residue.res_name):
 				for atom1 in residue.atoms:
 					for atom2 in residue.atoms:
 						if connectivity[residue.res_name].get(atom1.atom_name) and atom2.atom_name in connectivity[residue.res_name][atom1.atom_name]:
-							residue.add_connection(atom1, atom2)
+							self.add_connection(atom1, atom2)
 						elif connectivity[residue.res_name].get(atom2.atom_name) and atom1.atom_name in connectivity[residue.res_name][atom2.atom_name]:
-							residue.add_connection(atom1, atom2)
-
+							self.add_connection(atom1, atom2)
+	def create_connections_by_distance(self, distance=1.6):
+	#create connections by connecting atoms within a certain distance
+		a = self.atoms
+		for atom1 in range(len(a)):
+			for atom2 in range(atom1 + 1, len(a)):
+				if sqrt(sum((c1 - c2)**2 for c1, c2 in zip(a[atom1].coords(), a[atom2].coords()))) <= distance:
+					self.add_connection(a[atom1], a[atom2])
 def read_pdb(pdb_file):
 	global connectivity
 	pdb = structure()
@@ -139,11 +156,10 @@ def unique_dict(d):
 			if k in d.get(v):
 				d[v].remove(k)
 	return d
-init()
 
 if __name__ == '__main__':
 	pdb = read_pdb('1d89.pdb')
-	pdb.create_connections()
+	pdb.create_connections_by_id()
 	conns = {}
 	for residue in pdb.residues:
 		for conn in residue.connections:
