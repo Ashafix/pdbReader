@@ -1,10 +1,10 @@
 from math import sqrt
-
-
+import sys
+import os
 
 
 global connectivity
-connectivity = {}
+connectivity = dict()
 #deoxyribose
 deoxy = {"C1'": ["C2'", "O4'"],
     "C2'": ["C1'", "C3'", "O2'"],
@@ -42,7 +42,7 @@ connectivity['DT'].update(deoxy)
 connectivity['DC'].update({'N1': "C1'"})
 
 class atom:
-    def __init__(self, pos, x, y, z, chain='', element='', atom_name='', b=0, charge='', residue='', connections=[]):
+    def __init__(self, pos, x, y, z, chain='', element='', atom_name='', b=0, charge='', residue='', connections=list()):
         self.position = int(pos)
         self.chain = str(chain)
         self.element = str(element).strip()
@@ -60,7 +60,7 @@ class atom:
     def coords(self):
         return(self.x, self.y, self.z)
 class residue:
-    def __init__(self, index=None, res_name='', chain='', atoms=[]):
+    def __init__(self, index=None, res_name='', chain='', atoms=list()):
         if index:
             self.index = int(index)
         else:
@@ -77,9 +77,9 @@ class residue:
 
 class structure:
     def __init__(self):
-        self.atoms = []
-        self.residues = []
-        self.connections = {}
+        self.atoms = list()
+        self.residues = list()
+        self.connections = dict()
     def add_atom(self, atom):
         self.atoms.append(atom)
     def add_residue(self, residue_index, res_name='', chain=''):
@@ -124,14 +124,14 @@ def read_pdb(pdb_file):
     global connectivity
     pdb = structure()
     residue_no = None
-    atoms = []
+    atoms = list()
     for line in open(pdb_file, 'r').readlines():
 #ATOM      1  O5'  DC A   1      22.470  37.305  -6.447  1.18 34.97           O
         if line.startswith('ATOM') or line.startswith('HETATOM'):
             if residue_no != int(line[23:26]):
                 if residue_no:
                     pdb.add_atoms_to_residue(residue_no, atoms)
-                atoms = []
+                atoms = list()
                 residue_no = int(line[23:26])
                 pdb.add_residue(residue_no, line[17:20], line[21:22])
             new_atom = atom(line[6:11], line[30:38], line[38:46], line[46:54], line[21:22], line[76:78], line[12:16], line[60:66], line[78:80], residue_no)
@@ -158,9 +158,12 @@ def unique_dict(d):
     return d
 
 if __name__ == '__main__':
-    pdb = read_pdb('1d89.pdb')
+    if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
+        pdb = read_pdb(sys.argv[1])
+    else:
+        pdb = read_pdb('1d89.pdb')
     pdb.create_connections_by_id()
-    conns = {}
+    conns = dict()
     for residue in pdb.residues:
         for atom in residue.atoms:
             for conn in atom.connections:
@@ -173,17 +176,15 @@ if __name__ == '__main__':
 
     filelist = ['carbon.txt', 'nitrogen.txt', 'oxygen.txt', 'phosphorous.txt', 'all.txt', 'connections.txt']
 
-    f = []
+    f = list()
     for filename in filelist:
         f.append(open(filename, 'w'))
 
-    atom_map={}
+    atom_map= dict()
     atom_map['C'] = 0
     atom_map['N'] = 1
     atom_map['O'] = 2
     atom_map['P'] = 3
-
-
 
     for residue in pdb.atoms:
         index = atom_map.get(residue.element.strip())
@@ -191,8 +192,6 @@ if __name__ == '__main__':
             f[4].write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(residue.position, residue.x, residue.y, residue.z, index))
         else:
             print(residue.element)
-
-
 
     u = unique_dict(pdb.connections)
     for k in u.keys():
